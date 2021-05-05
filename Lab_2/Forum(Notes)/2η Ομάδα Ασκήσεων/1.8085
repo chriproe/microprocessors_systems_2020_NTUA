@@ -1,0 +1,41 @@
+	IN 10H
+	MVI A,00H	;Αριθμοί (0<=Α<=255)
+	LXI H,0900H	;Διευθύνσεις
+	LXI B,0000H	;Μονάδες
+	MVI D,00H	;Αριθμοί [10Η,60Η]
+START:
+	MOV M,A		;Αποθήκευση στη μνήμη
+	MOV E,A 	;Προσωρινή αποθήκευση
+	JMP ONES
+COUNTONES:
+	MOV A,E
+	JMP NUMBERS
+COUNTNUM:
+	INX H 		;Επόμενη θέση μνήμης
+	INR A 		;Επόμενος αριθμός
+	CPI 00H 	;Α=00Η ?
+	JZ FINISH 	;Έλεγχος τερματισμού
+	JMP START
+
+ONES:			;Μέτρηση μονάδων (δυαδικών 1)
+	STC			;CY=0
+	CMC			;
+	RAR			;Ψηφίο-ψηφίο στο CY
+	JNC ONE		;Μονάδα?
+	INX B
+ONE:
+	CPI 00H		;Α=00Η ?
+	JZ COUNTONES;Έλεγχος τερματισμού
+	JMP ONES
+
+NUMBERS:		;Μέτρηση αριθμών στο [10Η,60Η]
+	CPI 10H
+	JC COUNTNUM	;A<10H ?
+	CPI 60H
+	JC NUMBER	;Α<60H ?
+	JNZ COUNTNUM;Α=60H ?
+NUMBER:
+	INR D
+	JMP COUNTNUM
+FINISH:
+	END

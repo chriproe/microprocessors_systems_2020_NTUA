@@ -1,0 +1,27 @@
+START:
+	LDA 2000H	;Διακόπτες
+	MVI B,FFH	;LEDs
+SCAN:			;Σάρωση για μονάδες
+	RRC			;CY <- LSB
+	MOV C,A		;Προσωρινή αποθήκευση
+	JC FOUND	;Έλεγχος για μονάδα
+	CPI 00H		;Α=00000000 ?
+	JZ ZEROS	;Έλεγχος για απουσία μονάδων στην είσοδο
+	MOV A,B
+	STC			;CY <- 0
+	CMC			;
+	RAL			;Σβήσιμο του αντίστοιχου LED
+	MOV B,A		;Προσωρινή αποθήκευση
+	MOV A,C
+	JMP SCAN
+FOUND:			;Βρέθηκε η 1η μονάδα
+	MOV A,B		;Άναμμα LEDs ίσης και υψηλότερης τάξης
+	CMA			;Αντίστροφη λογική
+	STA 3000H
+	JMP START
+ZEROS:			;Μόνο μηδενικά
+	MVI A,FFH	;Σβήσιμο LEDs
+	STA 3000H
+	JMP START
+	
+	END

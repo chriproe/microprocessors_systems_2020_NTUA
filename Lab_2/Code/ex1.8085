@@ -1,0 +1,39 @@
+	IN 10H
+	MVI A,00H		;counter for question (a)
+	LXI H,0900H		;address
+	LXI B,0000H		;counter for question (b)
+	MVI D,00H		;counter for question (c)
+START:
+	MOV M,A		;moves A to memory (H)
+	MOV E,A		;stores A to E temprorarely
+	JMP QUEST_B
+LOOP_NUM: 
+	INX H			;increase address (H) by 1
+	INR A			;A = A + 1
+	CPI 00H		;checks if A is 256 (if true CY=0)
+	JZ FINISH		;if CY=0 goto FINISH
+	JMP START		;else start process with new number
+GOTO_C:
+	MOV A,E
+	JMP QUEST_C
+QUEST_B:
+	RAR			;CY = LSB(A)
+	JNC CHECK_A		;if CY = 0 check if end of number
+	INX B			;else increase B
+CHECK_A:
+	CPI 00H		;check if A = OOH
+	JZ  GOTO_C		;if A = 00H goto question (b)
+	JMP QUEST_B		;else continue count of ones
+QUEST_C:
+	CPI 10H		;compare A with 10H
+	JC LOOP_NUM		;if A < 10H continue to next number
+	CPI 60H		;compare A with 60H
+	JC INC_D		;if A < 60H increase D
+	JNZ LOOP_NUM		;else continue with new A
+INC_D:
+	INR D			;D = D + 1
+	JMP LOOP_NUM		;continue with new A
+FINISH:
+	RST 1
+	END
+	

@@ -1,0 +1,41 @@
+	LXI B,01F4H		;insert 500ms delay to B
+START:
+	LDA 2000H		;load switches to A
+	CPI C8H		;compare A to 200
+	JNC TOOBIG		;if A > 199 goto TOOBIG
+	CPI 64H		;compare A to 100
+	JNC BIG		;if A > 99 goto BIG
+	MVI D,FFH		;initial value of counter
+DECA:
+	INR D			;D = D + 1
+	SUI 0AH		;A = A - 10
+	JNC DECA		;if A > 0 continue
+	ADI 0AH		;if A < 0 correct negative
+	MOV E,A		;load units (A) to E
+	MOV A,D		;load decimal units (D) to A
+	RLC			;move decimal units 4 bits to left
+	RLC
+	RLC
+	RLC
+	ADD E			;add units to decimal
+	CMA			;reverse A for LEDs
+	STA 3000H		;load value A to LEDs
+	JMP START
+BIG:
+	MVI A,F0H		;load value of 4 LSB LEDs to A
+	STA 3000H		;load A to LEDs
+	CALL DELB		;delay 500ms
+	MVI A,FFH		;load value of blank LEDs to A
+	STA 3000H		;load A to LEDs
+	CALL DELB		;delay 500ms
+	JMP START		;start over
+TOOBIG:			
+	MVI A,0FH		;load value of 4 MSB LEDs to A
+	STA 3000H		;load A to LEDs
+	CALL DELB		;delay 500ms
+	MVI A,FFH		;load value of blank LEDs to A
+	STA 3000H		;load A to LEDs
+	CALL DELB		;delay 500ms
+	JMP START		;start over
+	
+	END

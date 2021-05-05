@@ -1,0 +1,30 @@
+	IN 10H
+	LXI B,01F4H	;Καθυστέρηση 500ms = 0x1F4
+	MVI E,01H	;Αρχικό LED το LSB
+START:
+	LDA 2000H
+	MOV D,A
+	RRC			;Ολίσθηση δεξιά
+	JC START	;Έλεγχος του LSB
+	CALL DELB	;Καθυστέρηση 0,5s
+	MOV A,D
+	RLC			;Ολίσθηση αριστερά
+	JC GORIGHT	;Έλεγχος του MSB
+GOLEFT:			;Κίνηση αριστερά
+	MOV A,E		;Προηγούμενο LED
+	CMA			;Αντίστροφη λογική στα LEDs
+	STA 3000H
+	CMA
+	RLC
+	MOV E,A		;Επόμενο LED
+	JMP START
+GORIGHT:		;Κίνηση δεξιά
+	MOV A,E
+	CMA
+	STA 3000H
+	CMA
+	RRC
+	MOV E,A
+	JMP START
+	
+	END

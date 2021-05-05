@@ -1,0 +1,56 @@
+START:
+	MVI D,00H	;LEDs
+				;X3
+	LDA 2000H	;A3
+	ANI 80H		;10000000
+	RRC			;Ολίσθηση για λογική πράξη με το επόμενο ψηφίο
+	MOV B,A		;Προσωρινή αποθήκευση
+	LDA 2000H	;B3
+	ANI 40H		;01000000
+	ANA B		;A3 AND B3
+	RRC			;Ολίσθηση για αποθήκευση στο X3
+	RRC			;
+	RRC			;
+	MOV D,A		;Αποθήκευση
+				;X2
+	LDA 2000H	;A2
+	ANI 20H		;00100000
+	RRC
+	MOV B,A
+	LDA 2000H	;B2
+	ANI 10H		;00010000
+	ANA B		;A2 AND B2
+	RRC			;Ολίσθηση για αποθήκευση στο X2
+	RRC			;
+	ORA D		;Προσθήκη
+	MOV D,A
+				;X1
+	LDA 2000H	;A1
+	ANI 08H		;00001000
+	RRC
+	MOV B,A
+	LDA 2000H	;B1
+	ANI 04H		;00000100
+	ORA B		;A1 OR B1
+	RRC			;Ολίσθηση στο LSB για XOR
+	RRC			;
+	MOV C,A		;Προσωρινή αποθήκευση
+	RLC			;Επαναφορά για αποθήκευση στο X1
+	ORA D
+	MOV D,A
+				;X0
+	LDA 2000H	;A0
+	ANI 02H		;00000010
+	RRC
+	MOV B,A
+	LDA 2000H	;B0
+	ANI 01H		;00000001
+	ORA B		;A0 OR B0
+	XRA C		;(A0 OR B0) XOR X1
+	ORA D
+	
+	CMA			;Αντίστροφη λογική
+	STA 3000H
+	JMP START
+	
+	END

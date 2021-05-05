@@ -1,0 +1,73 @@
+	IN 10H
+	MVI B,0FH		;K1
+	MVI C,EFH		;K2
+	MVI L,FFH		;Βοηθητικός
+	LXI D,0B00H		;Για την STDM
+
+	MVI A,10H		;Καθαρισµός της οθόνης
+	STA 0B00H		;
+	STA 0B01H		;
+	STA 0B02H		;
+	STA 0B03H		;
+	STA 0B04H		;
+	STA 0B05H		;
+	
+	MVI A,0DH		;Ενεργοποίηση διακοπής RST 6.5
+	SIM				;
+	EI				;
+	
+START:
+	STA 3000H		;Έξοδος στα LEDs
+	MOV A,L
+	CALL SCREEN		;Έξοδος στην οθόνη
+	
+	CMP B			;Σύγκριση με K1
+	JC RANGE1		;A<K1 ?
+	JZ RANGE1		;A=K1 ?
+	CMP C			;Σύγκριση με K2
+	JC RANGE2		;A<K2 ?
+	JZ RANGE2		;A=K2 ?
+	MVI A,FBH		;[0...K1] => 1ο LED
+	JMP START
+RANGE1:
+	MVI A,FEH		;(K1...K2] => 2ο LED
+	JMP START
+RANGE2:
+	MVI A,FDH		;(K2...FFH] => 3ο LED
+	JMP START
+	
+SCREEN:		;Ανανέωση της οθόνης
+	PUSH PSW
+	PUSH H
+	PUSH D
+	PUSH B
+	CALL STDM
+	CALL DCD
+	POP B
+	POP D
+	POP H
+	POP PSW
+	RET
+	
+INTR_ROUTINE:
+	PUSH PSW
+	
+	CALL KIND		;Είσοδος από πληκτρολόγιο
+	STA 0B00H		;LSB
+	MOV L,A			;Προσωρινή αποθήκευση μέχρι να λάβουμε το MSB
+	
+	CALL KIND
+	STA 0B01H		;MSB
+	
+	RLC				;4 φορές ολίσθηση για να τοποθετηθεί στο MSB
+	RLC				;
+	RLC				;
+	RLC				;
+	ORA L			;Ένωση LSB, MSB
+	MOV L,A
+	
+	POP PSW
+	EI
+	RET
+	
+	END

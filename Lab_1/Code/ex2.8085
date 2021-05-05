@@ -1,0 +1,30 @@
+	IN 10H			;for memory protection
+	LXI B,01F4H		;insert 500ms delay to B
+	MVI E,01H		;value of initial led pattern
+START:
+	LDA 2000H		;load switches to A
+	MOV D,A		;load A to D
+	RRC			;get value of LSB
+	JC START		;if LSB in ON start over
+	CALL DELB		;500ms delay
+	MOV A,D		;load D to A
+	RLC			;get value of MSB
+	JC GORIGHT	
+GOLEFT:		
+	MOV A,E		;load E to A
+	CMA			;reverse A for LEDs
+	STA 3000H		;load value A to LEDs
+	CMA			;reverse A back
+	RLC			;rotate left LEDs
+	MOV E,A		;store state of LEDs to E
+	JMP START		;start over
+GORIGHT:	
+	MOV A,E		;load state of LEDs to A
+	CMA			;reverse A for LEDs
+	STA 3000H		
+	CMA			;reverse A back
+	RRC			;rotate right LEDs
+	MOV E,A		;store state of LEDs to E
+	JMP START		;start over
+	
+	END

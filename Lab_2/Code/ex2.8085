@@ -1,0 +1,62 @@
+	MVI 	D,C8H		;200 * 0.1s = 20s
+	LXI 	B,0064H	;100*10^(-3) = 0.1s
+
+FIRST_CHECK:
+	LDA 	2000H		
+	RAL			;check MSB -> CY
+	JC	FIRST_CHECK	;if ом repeat
+	JMP	FIRST_OFF	
+
+FIRST_OFF:
+	LDA 	2000H
+	RAL
+	JC	FIRST_ON	;if ON
+	JMP 	FIRST_OFF	;if OFF, repeat until ON
+
+FIRST_ON:
+	LDA	2000H
+	RAL
+	JC	FIRST_ON	;if ом, repeat until OFF
+	JMP 	SECOND_OFF	;if OFF
+
+SECOND_OFF: 
+	LDA	 2000H
+	RAL
+	JC 	SECOND_ON	;if ом, check for next OFF
+	MVI	A,00H		;if else
+	STA 	3000H		;turn on LED
+	CALL 	DELB		;wait 0.1sec
+	DCR 	D		;decrease D, hence the time
+	MOV	A,D
+	CPI 	00H		;if D = 0, time is up (ф = 1)
+	JZ 	AGAIN		;repeat
+	JMP 	SECOND_OFF	;repeat until time is up
+
+SECOND_ON:
+	LDA 	2000H
+	RAL
+	JNC	RESTART_TIME	;if OFF, restart time
+	MVI 	A,00H		
+	STA 	3000H		;if ом, turn on LED
+	CALL 	DELB		;wait 0.1sec
+	DCR	D		;decrease D
+	MOV 	A,D		
+	CPI 	00H		;if D = 0, time is up
+	JZ 	AGAIN		;repeat
+	JMP	SECOND_ON	;repeat until time is up
+	
+
+AGAIN: 
+	MVI 	A,FFH		;turn off LED
+	STA 	3000H
+	MVI	D,C8H		;restart D = 200
+	JMP	FIRST_OFF	;repeat from the start
+
+RESTART_TIME:
+	MVI D,C8H		;restart time
+	JMP SECOND_OFF	
+END
+	
+	
+	
+	

@@ -1,0 +1,25 @@
+START:
+	MVI C,01H		;Initialize counter to 1
+	LDA 2000H		;Load input from switches
+	CPI 00H		;Check if input is zeros
+	JZ DISPLAY_ZEROS
+GOTO_LOOP:
+	RAR			;take LSB(A)
+	JC GOTO_DISPLAY	;if LSB(A) = 1 print counter
+	MOV E,A		;store A temporarily
+	MOV A,C		
+	RAL 			;rotate left the counter
+	MOV C,A
+	MOV A,E		;restore A
+	JNZ GOTO_LOOP		;repeat for next digit
+GOTO_DISPLAY:
+	MOV A,C
+	CMA 			;reverse bits (for LEDs)
+	STA 3000H		;output counter to LEDs
+	JMP START
+DISPLAY_ZEROS:
+	MVI A,FFH
+	STA 3000H
+	JMP START
+
+	END

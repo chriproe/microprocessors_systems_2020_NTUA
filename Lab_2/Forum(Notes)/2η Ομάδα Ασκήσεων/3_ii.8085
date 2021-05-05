@@ -1,0 +1,25 @@
+START:	
+	MVI B,80H	;LED
+	CALL KIND	;Διάβασμα πληκτρολογίου
+	CPI 00H		;A=0 ?
+	JZ TURNOFF	;Έλεγχος για το 0
+	CPI 09H		;A>=9 ?
+	JNC TURNOFF	;Έλεγχος για πλήκτρο >=9
+SLIDE:
+	DCR A		;Μείωση μέχρι να μηδενιστεί
+	MOV C,A
+	MOV A,B
+	RLC			;Ολίσθηση μέχρι το επιθυμητό LED
+	MOV B,A
+	MOV A,C
+	JZ SHOW		;Έλεγχος για μηδενισμό
+	JMP SLIDE
+TURNOFF:		;Σβήσιμο LED
+	MVI B,00H	;Πλήκτρο >=9 ή 0
+SHOW:			;Άναμμα LED
+	MOV A,B
+	CMA			;Αντίστροφη λογική
+	STA 3000H
+	JMP START
+	
+	END

@@ -1,0 +1,31 @@
+	LXI B,01F4H	;Καθυστέρηση 500ms = 0x1F4
+START:
+	LDA 2000H
+	CPI 64H		;Σύγκριση με το δεκαδικό 100
+	JNC TOOBIG	;Έλεγχος σχετικά με το δεκαδικό 100
+	MVI D,FFH
+DECA:
+	INR D
+	SUI 0AH
+	JNC DECA
+	ADI 0AH
+	MOV E,A
+	MOV A,D		;Δεκάδες
+	RLC			;Ολίσθηση 4 φορές αριστερά
+	RLC
+	RLC
+	RLC
+	ADD E		;Μονάδες
+	CMA
+	STA 3000H
+	JMP START
+TOOBIG:			;Είσοδος μεγαλύτερη του δεκαδικού 100
+	MVI A,0FH	;4 MSB
+	STA 3000H
+	CALL DELB	;Καθυστέρηση 0,5s
+	CMA			;4 LSB
+	STA 3000H
+	CALL DELB
+	JMP START
+	
+	END

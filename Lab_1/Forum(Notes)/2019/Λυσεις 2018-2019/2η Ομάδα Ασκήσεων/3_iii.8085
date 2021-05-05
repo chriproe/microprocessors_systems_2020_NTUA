@@ -1,0 +1,133 @@
+	IN 10H
+	LXI H,08FAH		;Τα μηνύματα στις διευθύνσεις 08FAH-08FFH
+	MVI M,10H		;Αρχικό σβήσιμο της οθόνης
+	LXI H,08FBH		;
+	MVI M,10H		;
+	LXI H,08FCH		;
+	MVI M,10H		;
+	LXI H,08FDH		;
+	MVI M,10H		;
+	LXI H,08FEH		;
+	MVI M,10H		;
+	LXI H,08FFH		;
+	MVI M,10H		;
+	
+SCAN7:
+	MVI A,7FH		;Γραμμή 7 (πλήκτρα D, E, F)
+	STA 2800H		;Σάρωση
+	LDA 1800H		;Ανάγνωση
+	MVI B,07H
+	ANA B
+	
+	CPI 03H			;Στήλη 2
+	JZ KEYF			;Έλεγχος για το πλήκτρο F
+	CPI 05H			;Στήλη 1
+	JZ KEYE			;Έλεγχος για το πλήκτρο E
+	CPI 06H			;Στήλη 0
+	JZ KEYD			;Έλεγχος για το πλήκτρο D
+	
+	CALL SHOW
+	JMP SCAN1
+KEYF:				;Εμφάνιση πλήκτρου F
+	LXI H,08FFH
+	MVI M,00H		;0
+	LXI H,08FEH
+	MVI M,0FH		;F
+	CALL SHOW
+	JMP SCAN1
+KEYE:				;Εμφάνιση πλήκτρου E
+	LXI H,08FFH
+	MVI M,00H		;0
+	LXI H,08FEH
+	MVI M,0EH		;E
+	CALL SHOW
+	JMP SCAN1
+KEYD:				;Εμφάνιση πλήκτρου D
+	LXI H,08FFH
+	MVI M,00H		;0
+	LXI H,08FEH
+	MVI M,0DH		;D
+	CALL SHOW
+	
+SCAN1:
+	MVI A,FDH		;Γραμμή 1 (πλήκτρα FETCH ADRS, FETCH REG, RUN)
+	STA 2800H
+	LDA 1800H
+	MVI B,07H
+	ANA B
+	
+	CPI 03H
+	JZ KEYFETCHADRS	;Έλεγχος για το πλήκτρο FETCH ADRS
+	CPI 05H
+	JZ KEYFETCHREG	;Έλεγχος για το πλήκτρο FETCH REG
+	CPI 06H
+	JZ KEYRUN		;Έλεγχος για το πλήκτρο RUN
+	
+	CALL SHOW
+	JMP SCAN6
+KEYFETCHADRS:		;Εμφάνιση πλήκτρου FETCH ADRS
+	LXI H,08FFH
+	MVI M,08H		;8
+	LXI H,08FEH
+	MVI M,02H		;2
+	CALL SHOW
+	JMP SCAN6
+KEYFETCHREG:		;Εμφάνιση πλήκτρου FETCH REG
+	LXI H,08FFH
+	MVI M,08H		;8
+	LXI H,08FEH
+	MVI M,00H		;0
+	CALL SHOW
+	JMP SCAN6
+KEYRUN:				;Εμφάνιση πλήκτρου RUN
+	LXI H,08FFH
+	MVI M,08H		;8
+	LXI H,08FEH
+	MVI M,04H		;4
+	CALL SHOW
+	
+SCAN6:
+	MVI A,BFH		;Γραμμή 6 (πλήκτρα A, B, C)
+	STA 2800H
+	LDA 1800H
+	MVI B,07H
+	ANA B
+	
+	CPI 03H
+	JZ KEYC			;Έλεγχος για το πλήκτρο C
+	CPI 05H
+	JZ KEYB			;Έλεγχος για το πλήκτρο B
+	CPI 06H
+	JZ KEYA			;Έλεγχος για το πλήκτρο A
+	
+	CALL SHOW
+	JMP SCAN7
+KEYC:				;Εμφάνιση πλήκτρου C
+	LXI H,08FFH
+	MVI M,00H		;0
+	LXI H,08FEH
+	MVI M,0CH		;C
+	CALL SHOW
+	JMP SCAN7
+KEYB:				;Εμφάνιση πλήκτρου B
+	LXI H,08FFH
+	MVI M,00H		;0
+	LXI H,08FEH
+	MVI M,0BH		;B
+	CALL SHOW
+	JMP SCAN7
+KEYA:				;Εμφάνιση πλήκτρου A
+	LXI H,08FFH
+	MVI M,00H		;0
+	LXI H,08FEH
+	MVI M,0AH		;A
+	CALL SHOW
+	JMP SCAN7
+	
+SHOW:				;Εμφάνιση στην οθόνη
+	LXI D,08FAH
+	CALL STDM
+	CALL DCD
+	RET
+	
+	END

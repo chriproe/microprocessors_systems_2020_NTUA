@@ -1,0 +1,28 @@
+START:
+	MVI C,FFH		;Initialize counter to 1
+	CALL KIND		;Load input from switches
+	CPI 00H		;Check if input is 0
+	JZ DISPLAY_ZEROS	
+	CPI 09H		;Check if input >=9
+	JNC DISPLAY_ZEROS 
+GOTO_LOOP:
+	DCR A			;Decrease counter
+	CPI 00H		;Check if counter = 0
+	JZ GOTO_DISPLAY	;if true print counter (C)
+	MOV E,A		;store A temporarily
+	MOV A,C		
+	RAL 			;rotate left the counter (C)
+	MOV C,A
+	MOV A,E		;restore A
+	JNZ GOTO_LOOP		;repeat
+GOTO_DISPLAY:
+	MOV A,C
+	CMA 			;reverse bits (for LEDs)
+	STA 3000H		;output counter to LEDs
+	JMP START
+DISPLAY_ZEROS:
+	MVI A,FFH
+	STA 3000H
+	JMP START
+
+	END
