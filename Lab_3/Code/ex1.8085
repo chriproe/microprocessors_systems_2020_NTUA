@@ -1,0 +1,83 @@
+; === INITIALIZE DISPLAY (BLANK) ===;
+	IN 10H			;disables memory protection
+	LXI H,0AA0H		;initial memory address of display digits
+	MVI A,06H		;sets counter (6)
+LOOP_BLANK:
+	MVI M,10H		;blank value to display position
+	INX H			;increase display digit position
+	DCR A			;decrease counter
+	CPI 00H		;check if counter is zero
+	JNZ LOOP_BLANK
+	
+; === ADD RST6.5 TO INTERRUPT MASK ===
+	MVI A,0DH		
+	SIM
+	EI
+	
+; === DISPLAY ZEROS UNTIL INTERRUPT ===
+INF:	
+	LXI H,0AA4H		;load digit 0 to first 2 digits from left
+	MVI M,00H
+	INX H
+	MVI M,00H
+LOAD:	
+	CALL DISP	
+	JMP LOAD
+
+; === 6-SEGMENT-DISPLAY ROUTINE ===
+DISP:				;displays digits stored in 0AA0-0AA5
+	PUSH D			;stores D
+	LXI D,0AA0H		;first address of 6 continuous addresses
+	CALL STDM	
+	CALL DCD
+	POP D			;restores D
+	RET
+
+; === INTERRUPT ROUTINE ===
+INTR_ROUTINE:
+	MVI E,3CH		;E = 60(s) (global counter)
+	LXI B,0032H		;B = 500(ms)
+	EI			;enable interrupts
+
+INIT:	
+	MVI D,0AH		;D = 10 (seconds counter)
+	CALL DECR_SEC		
+	
+	MVI A,00H		;A = 00000000
+	STA 3000H		;switch on all LEDs
+L1:	
+	CALL DISP		;display seconds remaining
+	CALL DELB		;500ms delay
+	DCR D			;decrease seconds counter
+	JNZ L1			;loop 10 times for hight refresh rate
+	
+	DCR E			;decrease counter
+	JNZ INIT
+
+	MVI A,FFH		;A = 11111111
+	STA 3000H		;switch off all LEDs
+	JMP INF
+
+; === REFRESH TIMER ===
+DECR_SEC:
+	PUSH B			;store B (decimal digits)
+	PUSH H			;store H
+	MVI B,FFH		;B = 1111 1111
+	MOV A,E		;A = global counter
+
+L2:	
+	INR B			;B = B + 1 (increase value of B by one) - decimal
+	SUI 0AH		;A = A - 10 (decreases A by 10s) - units
+	JNC L2			;loop until A = 0
+	ADI 0AH 		;Correct A so it is not negative
+
+	LXI H,0AA4H		;display
+	MOV M,A		;display (A) - units
+	INX H		
+	MOV M,B		;display (B) - decimals
+
+	POP H			;restore H
+	POP B			;restore B
+	RET
+
+	END

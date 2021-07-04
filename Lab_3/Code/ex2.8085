@@ -1,0 +1,64 @@
+	IN 	10H
+	MVI 	A,10H		;A is zero
+
+	STA	0A00H		;7-segment displays are zero
+	STA	0A01H
+	STA	0A02H
+	STA	0A03H
+	STA 	0A04H
+	STA 	0A05H
+	
+
+	MVI 	A,0DH		;RST6.5 interrupt mask
+	SIM
+	EI			;enable interrupts
+
+INTR:
+	DI
+	PUSH	PSW
+	CALL	KIND
+	STA	0A00H
+	RLC
+	RLC
+	RLC
+	RLC			;move to MSBs
+	MOV	B,A		;save MSBs in B
+	CALL	KIND
+	STA	0A01H		
+	ADD	B		;MSBs and LSBs
+	MOV	B,A		;save in B
+	PUSH	D		;save D and E
+	LXI	D,0A00H	
+	CALL	STDM
+	CALL	DCD	
+	POP	D		;restore D and E
+	
+	MOV	A,B		
+	INR	D			
+	CMP 	D		;if number < D
+	JC	ONE		;first area
+	INR	E		
+	CMP	E		;if number < E
+	JC	TWO		;second area
+	JNC	THREE		;if number > E third area
+	POP	PSW
+	EI
+	RET
+	
+
+ONE:
+	MVI	A,FEH
+	STA	3000H
+	RET
+	
+TWO:	MVI	A,FDH
+	STA 	3000H
+	RET
+
+THREE:	MVI	A,FBH
+	STA	3000H
+	RET
+
+LOOP1:
+	JMP	LOOP1		;wait next interrupt
+END		
